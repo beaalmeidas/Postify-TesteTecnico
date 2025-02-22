@@ -3,7 +3,7 @@ from ..run_app import app
 from ..app_config import db
 from flask import request, jsonify
 from flask_login import current_user, login_required
-from datetime import datetime
+from datetime import datetime, timezone
 
 
 @app.route('/posts', methods=['POST'])
@@ -15,10 +15,10 @@ def create_post():
         return jsonify({"message": "Adicione conteúdo para fazer a postagem!"}), 400
     
     new_post = Post(
-        user_id=current_user.id,
+        user_id=current_user.user_id,
         post_content=post_data['post_content'],
-        created_at=datetime.now(datetime.timezone.utc),
-        updated_at=datetime.now(datetime.timezone.utc)
+        created_at=datetime.now(timezone.utc),
+        updated_at=datetime.now(timezone.utc)
     )
 
     db.session.add(new_post)
@@ -47,7 +47,7 @@ def get_posts_by_user(username):
     if not user:
         return jsonify({"message": "Usuário não encontrado :("}), 404
 
-    posts = Post.query.filter_by(user_id=user.id).all()
+    posts = Post.query.filter_by(user_id=user.user_id).all()
 
     if not posts:
         return jsonify({"message": f"{username} ainda não criou nenhuma postagem"}), 404
@@ -59,7 +59,7 @@ def get_posts_by_user(username):
 @app.route('/posts/me', methods=['GET'])
 @login_required
 def get_my_posts():
-    posts = Post.query.filter_by(user_id=current_user.id).all()
+    posts = Post.query.filter_by(user_id=current_user.user_id).all()
 
     if not posts:
         return jsonify({"message": "Você ainda não criou nenhuma postagem"}), 404
@@ -68,10 +68,10 @@ def get_my_posts():
 
 
 # FUNÇÃO PARA OBTER UM POST ESPECÍFICO
-@app.route('/posts/<int:id>', methods=['GET'])
+@app.route('/posts/<int:post_id>', methods=['GET'])
 @login_required
-def get_post(id):
-    post = Post.query.get(id)
+def get_post(post_id):
+    post = Post.query.get(post_id)
 
     if not post:
         return jsonify({"message": "Postagem não encontrada :("}), 404
@@ -94,7 +94,7 @@ def update_post(post_id):
 
     if 'post_content' in post_data:
         post.post_content = post_data['post_content']
-        post.updated_at = datetime.now(datetime.timezone.utc)
+        post.updated_at = datetime.now(timezone.utc)
 
     try:
         db.session.commit()
@@ -112,8 +112,7 @@ def delete_post(post_id):
     if not post:
         return jsonify({"message": "Postagem não encontrada :("}), 404
 
-    # Apenas o dono do post ou admin pode deletar
-    if post.user_id != current_user.id and not current_user.is_admin:
+    if post.user_id != current_user.user_id and not current_user.is_admin:
         return jsonify({"message": "Você não tem permissão para deletar essa postagem"}), 403
 
     try:

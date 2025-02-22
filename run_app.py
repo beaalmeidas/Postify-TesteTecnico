@@ -1,13 +1,6 @@
-from flask import Flask
+from app_config import create_app
 
-
-app = Flask(__name__)
-
-
-@app.route('/')
-def home():
-    return 'Bem-vindo(a) ao Postify!'
-
+app = create_app()
 
 if __name__ == '__main__':
     app.run(debug=True)

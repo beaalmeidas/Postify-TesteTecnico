@@ -1,6 +1,6 @@
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
-from datetime import datetime
+from datetime import datetime, timezone
 from flask_login import UserMixin
 
 
@@ -8,7 +8,7 @@ db = SQLAlchemy()
 
 
 class User(db.Model, UserMixin):
-    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, primary_key=True)
     user_email = db.Column(db.String(120), unique=True, nullable=False)
     user_password_hash = db.Column(db.String(256), nullable=False)
     username = db.Column(db.String(50), unique=True, nullable=False)
@@ -22,10 +22,10 @@ class User(db.Model, UserMixin):
 
 
 class Post(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
+    post_id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     post_content = db.Column(db.Text, nullable=False)
-    created_at = db.Column(db.DateTime, default=datetime.timezone.utc)
-    updated_at = db.Column(db.DateTime, default=datetime.timezone.utc, onupdate=datetime.timezone.utc)
+    created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
+    updated_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
 
     user = db.relationship('User', backref=db.backref('authored_posts', lazy=True))

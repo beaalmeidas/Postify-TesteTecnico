@@ -36,30 +36,30 @@ def list_users():
     if not users:
         return jsonify({"message": "Não há usuários cadastrados :("}), 200
     
-    users_list = [{'id': user.id, 'username': user.username,} for user in users]
+    users_list = [{'user_id': user.user_id, 'username': user.username,} for user in users]
 
     return jsonify({'users': users_list})
 
 
 @app.route('users/<int:id>', methods=['GET'])
-def get_user(id):
-    searched_user = User.query.get(id)
+def get_user(user_id):
+    searched_user = User.query.get(user_id)
 
     if searched_user is None:
         return jsonify({'message': 'Usuário não encontrado :('}), 404
     
-    return jsonify({'id': searched_user.id, 'username': searched_user.username})
+    return jsonify({'user_id': searched_user.user_id, 'username': searched_user.username})
 
 
 @app.route('/users/<int:id>', methods=['PUT'])
 @login_required
-def update_user(id):
-    user = User.query.get(id)
+def update_user(user_id):
+    user = User.query.get(user_id)
     
     if not user:
         return jsonify({"message": "Usuário não encontrado :("}), 404
     
-    if not current_user.is_admin and current_user.id != id:
+    if not current_user.is_admin and current_user.user_id != user_id:
         return jsonify({"message": "Você não tem permissão para editar esse usuário."}), 403
 
     user_data = request.json
@@ -83,13 +83,13 @@ def update_user(id):
 
 @app.route('/users/<int:id>', methods=['DELETE'])
 @login_required
-def delete_user(id):
-    user = User.query.get(id)
+def delete_user(user_id):
+    user = User.query.get(user_id)
 
     if not user:
         return jsonify({"message": "Usuário não encontrado :("}), 404
     
-    if not current_user.is_admin and current_user.id != id:
+    if not current_user.is_admin and current_user.user_id != user_id:
         return jsonify({"message": "Você não tem permissão para deletar esse usuário."}), 403
 
     try:
