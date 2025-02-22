@@ -7,10 +7,19 @@ from flask import request, jsonify
 @app.route('/users', methods=['POST'])
 def create_user():
     user_data = request.json
+
+    if not user_data.get('email'):
+        return jsonify({'message': 'O e-mail é obrigatório'}), 400
+    if not user_data.get('password'):
+        return jsonify({'message': 'A senha é obrigatória'}), 400
+    if not user_data.get('username'):
+        return jsonify({'message': 'O nome de usuário é obrigatório'}), 400
+
     new_user = User(user_email=user_data['user_email'], 
                     user_password_hash=user_data['user_password_hash'],
                     username=user_data['username'],
                     is_admin=user_data['is_admin'])
+    
     db.session.add(new_user)
     db.session.commit()
     
