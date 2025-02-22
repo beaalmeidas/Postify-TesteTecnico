@@ -2,6 +2,7 @@ from ..models import User
 from ..run_app import app
 from ..app_config import db
 from flask import request, jsonify
+from flask_login import current_user, login_required
 
 
 @app.route('/users', methods=['POST'])
@@ -50,3 +51,51 @@ def get_user(id):
     return jsonify({'id': searched_user.id, 'username': searched_user.username})
 
 
+@app.route('/users/<int:id>', methods=['PUT'])
+@login_required
+def update_user(id):
+    user = User.query.get(id)
+    
+    if not user:
+        return jsonify({"message": "Usuário não encontrado :("}), 404
+    
+    if not current_user.is_admin and current_user.id != id:
+        return jsonify({"message": "Você não tem permissão para editar esse usuário."}), 403
+
+    user_data = request.json
+
+    if user_data.get('username'):
+        user.username = user_data['username']
+    if user_data.get('email'):
+        user.user_email = user_data['email']
+    if user_data.get('password'):
+        user.secure_password(user_data['password'])
+    if 'is_admin' in user_data and current_user.is_admin:
+        user.is_admin = user_data['is_admin']
+
+    try:
+        db.session.commit()
+        return jsonify({"message": "Usuário atualizado com sucesso :)", "user": user.to_dict()}), 200
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"message": "Erro ao atualizar o usuário.", "error": str(e)}), 500
+    
+
+@app.route('/users/<int:id>', methods=['DELETE'])
+@login_required
+def delete_user(id):
+    user = User.query.get(id)
+
+    if not user:
+        return jsonify({"message": "Usuário não encontrado :("}), 404
+    
+    if not current_user.is_admin and current_user.id != id:
+        return jsonify({"message": "Você não tem permissão para deletar esse usuário."}), 403
+
+    try:
+        db.session.delete(user)
+        db.session.commit()
+        return jsonify({"message": "Usuário deletado com sucesso."}), 200
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"message": "Erro ao deletar o usuário.", "error": str(e)}), 500

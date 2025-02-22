@@ -6,7 +6,7 @@ app = Flask(__name__)
 
 @app.route('/')
 def home():
-    return 'Página inicial'
+    return 'Bem-vindo(a) ao Postify!'
 
 
 if __name__ == '__main__':
