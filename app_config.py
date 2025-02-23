@@ -1,14 +1,13 @@
 from flask import Flask
-#from flask_sqlalchemy import SQLAlchemy
 from .db_config import DBConfig, db
 from flask_migrate import Migrate
 from flask_login import LoginManager
 from .models import User
 from flask_restx import Api
-from .controllers.user_controllers import api as users_ns
+from .controllers.user_controllers import users_ns
+from .controllers.auth_controllers import auth_ns
 
 
-#db = SQLAlchemy()
 login_manager = LoginManager()
 migrate = Migrate()
 
@@ -28,7 +27,7 @@ def create_app():
     
     api = Api(app, title='Api Flask Postify', version='1.0', description='Api de rede social com python flask',prefix='/api')
     api.add_namespace(users_ns, path='/users')
-    # api.add_namespace(home_ns, path='/posts')
+    api.add_namespace(auth_ns, path='/auth')
 
     return app
 

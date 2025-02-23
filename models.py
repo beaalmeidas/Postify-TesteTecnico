@@ -24,6 +24,9 @@ class User(db.Model, UserMixin):
             'username': self.username,
             'is_admin': self.is_admin
         }
+    
+    def get_id(self):
+        return str(self.user_id)
 
 
 class Post(db.Model):

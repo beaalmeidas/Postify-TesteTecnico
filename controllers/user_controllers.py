@@ -5,22 +5,22 @@ from flask_login import current_user, login_required
 from flask_restx import Resource, Namespace, fields
 
 
-api = Namespace('Users',description='Manutenção dados dos usuários')
+users_ns = Namespace('Users', description='Manutenção dos dados dos usuários')
 
 
-user_model = api.model('UserModel', {
+user_model = users_ns.model('UserModel', {
     'user_id': fields.Integer,
-    'user_email': fields.String(description='User email', required=True),
-    'user_password': fields.String(description='User password', required=True),
-    'username': fields.String(description='Username', required=True),
-    'is_admin': fields.Boolean(description='Flag indicating if the user has admin privileges', default=False)  
+    'user_email': fields.String(description='Email do usuário', required=True),
+    'user_password': fields.String(description='Senha de usuário', required=True),
+    'username': fields.String(description='Nome de usuário', required=True),
+    'is_admin': fields.Boolean(description='Indicador de que o usuário é Administrador ou não', default=False)  
 })
 
 
-@api.route('/')
+@users_ns.route('/')
 class UserController(Resource):
 
-    @api.expect(user_model)
+    @users_ns.expect(user_model)
     def post(self):
         user_data = request.json
 
@@ -52,9 +52,9 @@ class UserController(Resource):
         return ({"message": "Usuário criado, bem-vindo(a) ao Postify! :)", "user": new_user.to_dict()}), 201
 
 
-    @api.response(200, "Não há usuários cadastrados :(")
+    @users_ns.response(200, "Não há usuários cadastrados :(")
     @login_required
-    def get():
+    def get(self):
         users = User.query.all()
 
         if not users:
@@ -65,12 +65,12 @@ class UserController(Resource):
         return jsonify({'users': users_list})
     
 
-@api.route('/<string:username>')
+@users_ns.route('/<string:username>')
 class UserByUsernameController(Resource):
 
     @login_required
     def get(self, username):
-        searched_user = User.query.get(username)
+        searched_user = User.query.filter_by(username=username).first()
 
         if searched_user is None:
             return jsonify({'message': 'Usuário não encontrado :('}), 404
@@ -78,57 +78,76 @@ class UserByUsernameController(Resource):
         return jsonify({'user_id': searched_user.user_id, 'username': searched_user.username})
 
 
-@api.route('/<int:user_id>')
-class UserByIdController(Resource):
-
-    @api.response(200, "Teste update")
-    @api.param('username','Nome de usuário')
-    @api.param('email','Endereço de email do usuário')
-    @api.param('password','Senha de usuário')
+    @users_ns.param('user_email', 'Endereço de email do usuário')
+    @users_ns.param('user_password', 'Senha de usuário')
+    @users_ns.param('username', 'Nome de usuário')
     @login_required
-    def put(self, user_id):
-        user = User.query.get(user_id)
+    def put(self, username):
+        user = User.query.filter_by(username=username).first()
         
         if not user:
-            return jsonify({"message": "Usuário não encontrado :("}), 404
+            return ({"message": "Usuário não encontrado :("}), 404
         
-        if not current_user.is_admin and current_user.user_id != user_id:
-            return jsonify({"message": "Você não tem permissão para editar esse usuário."}), 403
+        if not current_user.is_admin and current_user.username != username:
+            return ({"message": "Você não tem permissão para editar esse usuário."}), 403
 
         user_data = request.json
 
+        if user_data.get('user_email'):
+            user.user_email = user_data['user_email']
+        if user_data.get('user_password'):
+            user.secure_password(user_data['user_password'])
         if user_data.get('username'):
             user.username = user_data['username']
-        if user_data.get('email'):
-            user.user_email = user_data['email']
-        if user_data.get('password'):
-            user.secure_password(user_data['password'])
         if 'is_admin' in user_data and current_user.is_admin:
             user.is_admin = user_data['is_admin']
 
         try:
             db.session.commit()
-            return jsonify({"message": "Usuário atualizado com sucesso :)", "user": user.to_dict()}), 200
+            
+            updated_user = user.to_dict()
+
+            print(updated_user)
+            print(type(updated_user))
+
+            return ({
+                "message": "Usuário atualizado com sucesso :)",
+                "user": updated_user
+            }), 200
+        
         except Exception as e:
             db.session.rollback()
-            return jsonify({"message": "Erro ao atualizar o usuário.", "error": str(e)}), 500
-    
+            print(f"Erro ao atualizar usuário: {e}")
+            return ({
+                "message": "Erro ao atualizar o usuário.",
+                "error": str(e)
+            }), 500
 
-    @api.response(200, "Deletando usuário")
+
+    @users_ns.response(200, "Deletando usuário")
     @login_required
-    def delete(self, user_id):
-        user = User.query.get(user_id)
+    def delete(self, username):
+        user = User.query.filter_by(username=username).first()
 
         if not user:
-            return jsonify({"message": "Usuário não encontrado :("}), 404
+            return ({"message": "Usuário não encontrado :("}), 404
         
-        if not current_user.is_admin and current_user.user_id != user_id:
-            return jsonify({"message": "Você não tem permissão para deletar esse usuário."}), 403
+        if not current_user.is_admin and current_user.username != username:
+            return ({"message": "Você não tem permissão para deletar esse usuário."}), 403
 
         try:
+            user_name = user.username
             db.session.delete(user)
             db.session.commit()
-            return jsonify({"message": "Usuário deletado com sucesso."}), 200
+
+            return ({
+                "message": f"Usuário '{user_name}' deletado com sucesso.",
+                "status": "success"
+            }), 200
+        
         except Exception as e:
             db.session.rollback()
-            return jsonify({"message": "Erro ao deletar o usuário.", "error": str(e)}), 500
+            return ({
+                "message": "Erro ao deletar o usuário.",
+                "error": str(e)
+            }), 500
