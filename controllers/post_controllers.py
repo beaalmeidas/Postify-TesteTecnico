@@ -87,7 +87,7 @@ def update_post(post_id):
     if not post:
         return jsonify({"message": "Postagem não encontrada :("}), 404
     
-    if post.user_id != current_user.id and not current_user.is_admin:
+    if post.user_id != current_user.user_id and not current_user.is_admin:
         return jsonify({"message": "Você não tem permissão para editar essa postagem"}), 403
     
     post_data = request.json

@@ -1,4 +1,4 @@
-from app_config import db
+from .db_config import db
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin
 from datetime import datetime, timezone
@@ -16,13 +16,31 @@ class User(db.Model, UserMixin):
 
     def check_password(self, user_password):
         return check_password_hash(self.user_password_hash, user_password)
+    
+    def to_dict(self):
+        return {
+            'user_id': self.user_id,
+            'user_email': self.user_email,
+            'username': self.username,
+            'is_admin': self.is_admin
+        }
 
 
 class Post(db.Model):
     post_id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.user_id'), nullable=False)
     post_content = db.Column(db.Text, nullable=False)
     created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
     updated_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
 
     user = db.relationship('User', backref=db.backref('authored_posts', lazy=True))
+
+    def to_dict(self):
+        return {
+            'post_id': self.post_id,
+            'user_id': self.user_id,
+            'post_content': self.post_content,
+            'created_at': self.created_at,
+            'updated_at': self.updated_at,
+            'user': self.user.username
+        }

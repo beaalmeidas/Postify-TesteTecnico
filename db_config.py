@@ -1,5 +1,8 @@
 import os
+from flask_sqlalchemy import SQLAlchemy
 
+
+db = SQLAlchemy()
 
 class DBConfig:
     SQLALCHEMY_TRACK_MODIFICATIONS = False
