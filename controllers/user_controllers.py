@@ -15,6 +15,14 @@ def create_user():
         return jsonify({'message': 'É obrigatório inserir uma senha'}), 400
     if not user_data.get('username'):
         return jsonify({'message': 'É obrigatório inserir um username'}), 400
+    
+    existing_user = User.query.filter_by(user_email=user_data.get('email')).first()
+    if existing_user:
+        return jsonify({'message': 'Usuário já existe. Por favor, faça login.'}), 409
+
+    existing_username = User.query.filter_by(username=user_data.get('username')).first()
+    if existing_username:
+        return jsonify({'message': 'Esse username já está em uso :('}), 409
 
     new_user = User(user_email=user_data['user_email'], 
                     user_password_hash=user_data['password'],
@@ -26,10 +34,11 @@ def create_user():
     db.session.add(new_user)
     db.session.commit()
     
-    return jsonify({"message": "Usuário criado com sucesso :)", "user": new_user.to_dict()}), 201
+    return jsonify({"message": "Usuário criado, bem-vindo(a) ao Postify! :)", "user": new_user.to_dict()}), 201
 
 
 @app.route('/users', methods=['GET'])
+@login_required
 def list_users():
     users = User.query.all()
 
@@ -42,6 +51,7 @@ def list_users():
 
 
 @app.route('users/<int:id>', methods=['GET'])
+@login_required
 def get_user(user_id):
     searched_user = User.query.get(user_id)
 
