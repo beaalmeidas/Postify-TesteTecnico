@@ -21,6 +21,9 @@ user_model = users_ns.model('UserModel', {
 class UserController(Resource):
 
     @users_ns.expect(user_model)
+    @users_ns.response(201, "Usuário criado com sucesso :)", model=user_model)
+    @users_ns.response(400, "Dados obrigatórios faltando", model=user_model)
+    @users_ns.response(409, "Usuário já existe")
     def post(self):
         user_data = request.json
 
@@ -52,6 +55,7 @@ class UserController(Resource):
         return ({"message": "Usuário criado, bem-vindo(a) ao Postify! :)", "user": new_user.to_dict()}), 201
 
 
+    @users_ns.response(200, "Lista de usuários", model=user_model)
     @users_ns.response(200, "Não há usuários cadastrados :(")
     @login_required
     def get(self):
@@ -68,6 +72,8 @@ class UserController(Resource):
 @users_ns.route('/<string:username>')
 class UserByUsernameController(Resource):
 
+    @users_ns.response(200, "Detalhes do usuário", model=user_model)
+    @users_ns.response(404, "Usuário não encontrado :(")
     @login_required
     def get(self, username):
         searched_user = User.query.filter_by(username=username).first()
@@ -81,6 +87,10 @@ class UserByUsernameController(Resource):
     @users_ns.param('user_email', 'Endereço de email do usuário')
     @users_ns.param('user_password', 'Senha de usuário')
     @users_ns.param('username', 'Nome de usuário')
+    @users_ns.response(200, "Usuário atualizado com sucesso :)", model=user_model)
+    @users_ns.response(403, "Você não tem permissão para editar esse usuário.")
+    @users_ns.response(404, "Usuário não encontrado :(")
+    @users_ns.response(500, "Erro ao atualizar o usuário")
     @login_required
     def put(self, username):
         user = User.query.filter_by(username=username).first()
@@ -124,7 +134,10 @@ class UserByUsernameController(Resource):
             }), 500
 
 
-    @users_ns.response(200, "Deletando usuário")
+    @users_ns.response(200, "Usuário deletado com sucesso", model=user_model)
+    @users_ns.response(403, "Você não tem permissão para deletar esse usuário.")
+    @users_ns.response(404, "Usuário não encontrado :(")
+    @users_ns.response(500, "Erro ao deletar o usuário")
     @login_required
     def delete(self, username):
         user = User.query.filter_by(username=username).first()
