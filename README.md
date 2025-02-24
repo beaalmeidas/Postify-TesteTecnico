@@ -37,6 +37,8 @@
 📂 postman-tests/
     L 📄 Postify-Testes.postman_collection.json     # arquivo de testes para o Postman
 📄 .gitignore
+📄 docker-compose.yml                               # configuração do Docker
+📄 Dockerfile                                       
 📄 README.md
 📄 requirements.txt                                 # requisitos para rodar o projeto
 ```
@@ -71,11 +73,13 @@ URL BASE: http://127.0.0.1:5000/api
 
 #### Pré-requisitos:
 Antes de rodar o projeto, tenha certeza de ter instalados:
-- Python
-- PostgreSQL
+- Docker
+- Docker Compose
 - Postman
 - PgAdmin, DBeaver, ou algum outro SGDB compatível com PostgreSQL para melhor checagem do banco de dados (opcional)
 </br>
+
+### Opção 1: Rodando com Docker
 
 **1. Clone o repositório:**
    ```bash
@@ -83,7 +87,34 @@ Antes de rodar o projeto, tenha certeza de ter instalados:
    ```
 </br>
 
-**2. Ao abrir a pasta em um editor de texto e abrir um novo terminal, use o seguinte comando para criar um ambiente virtual:**
+**2. Suba os containers com Docker Compose:**
+```bash
+docker-compose up -d
+```
+</br>
+
+Isso irá iniciar a API Flask e o banco PostgreSQL automaticamente.
+
+**3. Acesse a API:**
+A aplicação estará rodando em:
+📌 http://127.0.0.1:5000/
+📌 Swagger disponível em http://127.0.0.1:5000/swagger/
+</br>
+
+### Opção 2: Rodando sem Docker (usando a branch 'develop')
+
+**1. Clone o repositório:**
+   ```bash
+   git clone https://github.com/beaalmeidas/Postify-TesteTecnico.git
+   ```
+</br>
+
+**2. Abra a pasta em um editor de texto e abra um novo terminal. Após isso, vá para a branch develop:**
+   ```bash
+    git checkout develop
+   ```
+
+**3. Ao abrir a pasta em um editor de texto e abrir um novo terminal, use o seguinte comando para criar um ambiente virtual:**
    ```bash
    python -m venv venv
    venv/Scripts/activate
@@ -93,13 +124,13 @@ Antes de rodar o projeto, tenha certeza de ter instalados:
    ```
 </br>
 
-**3. Instale as dependências:**
+**4. Instale as dependências:**
    ```bash
    pip install -r requirements.txt
    ```
 </br>
 
-**4. Configure o banco de dados:**
+**5. Configure o banco de dados:**
    ```bash
     # Usuário: admin
     # Senha: 1234
@@ -137,7 +168,7 @@ Antes de rodar o projeto, tenha certeza de ter instalados:
 
 </br>
 
-**5. Rode a aplicação:**
+**6. Rode a aplicação:**
 ```bash
     cd postify-app
     flask run
