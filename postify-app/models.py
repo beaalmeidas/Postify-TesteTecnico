@@ -4,6 +4,7 @@ from flask_login import UserMixin
 from datetime import datetime, timezone
 
 
+# MODEL DE USUÁRIO
 class User(db.Model, UserMixin):
     user_id = db.Column(db.Integer, primary_key=True)
     user_email = db.Column(db.String(120), unique=True, nullable=False)
@@ -29,6 +30,7 @@ class User(db.Model, UserMixin):
         return str(self.user_id)
 
 
+# MODEL DE POSTAGEM
 class Post(db.Model):
     post_id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.user_id'), nullable=False)

@@ -1,6 +1,6 @@
+from flask import request
 from ..models import Post, User
 from ..app_config import db
-from flask import request, jsonify
 from flask_login import current_user, login_required
 from datetime import datetime, timezone
 from flask_restx import Resource, Namespace, fields
@@ -9,6 +9,7 @@ from flask_restx import Resource, Namespace, fields
 posts_ns = Namespace('Posts', description='Manutenção de postagens')
 
 
+# SCHEMA PARA OS DADOS DE POSTAGEM
 post_model = posts_ns.model('PostModel', {
     'post_id': fields.Integer(description='ID da postagem'),
     'user_id': fields.Integer(description='ID do usuário que criou a postagem', required=True),
@@ -19,6 +20,7 @@ post_model = posts_ns.model('PostModel', {
 })
 
 
+# ROTA PARA FUNÇÃO DE CRIAR POSTAGEM
 @posts_ns.route('/new-post')
 class PostCreateController(Resource):
 
@@ -45,6 +47,7 @@ class PostCreateController(Resource):
         return ({"message": "Postagem feita :)", "post": new_post.to_dict()}), 201
 
 
+# ROTA PARA FUNÇÃO DE LISTAR TODAS AS POSTAGENS (QUALQUER USUÁRIO)
 @posts_ns.route('/all-posts')
 class AllPostsController(Resource):
     
@@ -60,6 +63,7 @@ class AllPostsController(Resource):
         return ({"posts": [post.to_dict() for post in posts]}), 200
 
 
+# ROTA PARA FUNÇÃO DE LISTAR TODAS AS POSTAGENS DE UM USUÁRIO ESPECÍFICO
 @posts_ns.route('/user/<string:username>')
 class PostsByUserController(Resource):
 
@@ -80,6 +84,7 @@ class PostsByUserController(Resource):
         return ({"posts": [post.to_dict() for post in posts]}), 200
 
 
+# ROTA PARA FUNÇÃO DE LISTAR TODAS AS POSTAGENS DO USUÁRIO LOGADO
 @posts_ns.route('/my-posts')
 class MyPostsController(Resource):
 
@@ -95,9 +100,11 @@ class MyPostsController(Resource):
         return ({"posts": [post.to_dict() for post in posts]}), 200
 
 
+# ROTAS POR ID DA POSTAGEM
 @posts_ns.route('/post/<int:post_id>')
 class PostByIdController(Resource):
 
+    # FUNÇÃO DE BUSCAR UMA POSTAGEM ESPECÍFICA
     @posts_ns.response(200, 'Postagem encontrada')
     @posts_ns.response(404, 'Postagem não encontrada')
     @login_required
@@ -110,6 +117,7 @@ class PostByIdController(Resource):
         return ({"post": post.to_dict()}), 200
 
 
+    # FUNÇÃO DE EDITAR UMA POSTAGEM (UPDATE)
     @posts_ns.response(200, 'Postagem atualizada com sucesso')
     @posts_ns.response(404, 'Postagem não encontrada')
     @posts_ns.response(403, 'Você não tem permissão para editar esse post')
@@ -138,6 +146,7 @@ class PostByIdController(Resource):
             return ({"message": "Erro ao atualizar a postagem", "error": str(e)}), 500
 
 
+    # FUNÇÃO DE DELETAR UMA POSTAGEM
     @posts_ns.response(200, 'Postagem deletada com sucesso')
     @posts_ns.response(404, 'Postagem não encontrada')
     @posts_ns.response(403, 'Você não tem permissão para deletar esse post')

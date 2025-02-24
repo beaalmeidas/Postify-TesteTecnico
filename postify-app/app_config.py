@@ -1,8 +1,8 @@
 from flask import Flask
 from .db_config import DBConfig, db
 from flask_migrate import Migrate
-from flask_login import LoginManager
 from .models import User
+from flask_login import LoginManager
 from flask_restx import Api
 from .controllers.user_controllers import users_ns
 from .controllers.post_controllers import posts_ns
@@ -27,6 +27,8 @@ def create_app():
     migrate.init_app(app, db)
     
     api = Api(app, title='Api Flask Postify', version='1.0', description='Api de rede social com python flask',prefix='/api')
+    
+    # ROTAS
     api.add_namespace(users_ns, path='/users')
     api.add_namespace(posts_ns, path='/posts')
     api.add_namespace(auth_ns, path='/auth')

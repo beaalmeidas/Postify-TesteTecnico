@@ -1,6 +1,6 @@
+from flask import request, jsonify
 from ..models import User
 from ..app_config import db
-from flask import request, jsonify
 from flask_login import current_user, login_required
 from flask_restx import Resource, Namespace, fields
 
@@ -8,6 +8,7 @@ from flask_restx import Resource, Namespace, fields
 users_ns = Namespace('Users', description='Manutenção dos dados dos usuários')
 
 
+# SCHEMA PARA OS DADOS DE USUÁRIO
 user_model = users_ns.model('UserModel', {
     'user_id': fields.Integer(description='ID do usuário'),
     'user_email': fields.String(description='Email do usuário', required=True),
@@ -20,6 +21,7 @@ user_model = users_ns.model('UserModel', {
 @users_ns.route('/')
 class UserController(Resource):
 
+    # FUNÇÃO PARA CRIAR USUÁRIO
     @users_ns.expect(user_model)
     @users_ns.response(201, "Usuário criado com sucesso :)", model=user_model)
     @users_ns.response(400, "Dados obrigatórios faltando", model=user_model)
@@ -55,6 +57,7 @@ class UserController(Resource):
         return ({"message": "Usuário criado, bem-vindo(a) ao Postify! :)", "user": new_user.to_dict()}), 201
 
 
+    # FUNÇÃO PARA LISTAS TODOS OS USUÁRIOS CADASTRADOS
     @users_ns.response(200, "Lista de usuários", model=user_model)
     @users_ns.response(200, "Não há usuários cadastrados :(")
     @login_required
@@ -69,9 +72,11 @@ class UserController(Resource):
         return jsonify({'users': users_list})
     
 
+# ROTAS POR NOME DE USUÁRIO
 @users_ns.route('/<string:username>')
 class UserByUsernameController(Resource):
 
+    # FUNÇÃO DE MOSTRAR USUÁRIO ESPECÍFICO
     @users_ns.response(200, "Detalhes do usuário", model=user_model)
     @users_ns.response(404, "Usuário não encontrado :(")
     @login_required
@@ -84,6 +89,7 @@ class UserByUsernameController(Resource):
         return jsonify({'user_id': searched_user.user_id, 'username': searched_user.username})
 
 
+    # FUNÇÃO DE EDITAR USUÁRIO (UPDATE)
     @users_ns.param('user_email', 'Endereço de email do usuário')
     @users_ns.param('user_password', 'Senha de usuário')
     @users_ns.param('username', 'Nome de usuário')
@@ -134,6 +140,7 @@ class UserByUsernameController(Resource):
             }), 500
 
 
+    # FUNÇÃO DE DELETAR USUÁRIO
     @users_ns.response(200, "Usuário deletado com sucesso", model=user_model)
     @users_ns.response(403, "Você não tem permissão para deletar esse usuário.")
     @users_ns.response(404, "Usuário não encontrado :(")

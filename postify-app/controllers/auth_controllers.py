@@ -1,24 +1,27 @@
-from flask import request, jsonify
+from flask import request
+from ..models import User
 from flask_login import login_user, login_required, logout_user, current_user
 from werkzeug.security import check_password_hash
-from ..models import User
 from flask_restx import Resource, Namespace, fields
 
 
 auth_ns = Namespace('Authentication', description='Funções de autenticação')
 
 
+# SCHEMA PARA DADOS DE LOGIN
 auth_model = auth_ns.model('AuthModel', {
     'email': fields.String(description='Email do usuário', required=True),
     'password': fields.String(description='Senha do usuário', required=True)
 })
 
 
+# SCHEMA PARA USUÁRIO LOGADO
 status_model = auth_ns.model('StatusModel', {
     'message': fields.String(description='Mostra qual usuário está logado')
 })
 
 
+# FUNÇÃO LOGIN
 @auth_ns.route('/login')
 class LoginController(Resource):
     
@@ -47,6 +50,7 @@ class LoginController(Resource):
         return {"message": "Email ou senha inválidos"}, 401
 
 
+# FUNÇÃO LOGOUT
 @auth_ns.route('/logout')
 class LogoutController(Resource):
 
@@ -57,6 +61,7 @@ class LogoutController(Resource):
         return {"message": "Saindo do Postify. Até a próxima!"}, 200
 
 
+# FUNÇÃO DE CHECAR QUAL USUÁRIO ESTÁ LOGADO
 @auth_ns.route('/status')
 class StatusController(Resource):
 
