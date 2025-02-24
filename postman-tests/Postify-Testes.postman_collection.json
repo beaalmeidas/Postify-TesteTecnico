@@ -22,7 +22,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"email\": \"admin@gmail.com\",\r\n    \"password\": \"123456\"\r\n}",
+							"raw": "{\r\n    \"email\": \"\",\r\n    \"password\": \"\"\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -223,7 +223,7 @@
 					"response": []
 				},
 				{
-					"name": "USER/GET-USER",
+					"name": "USER/GET-USER-BY-ID",
 					"protocolProfileBehavior": {
 						"disableBodyPruning": true
 					},
@@ -246,7 +246,7 @@
 							}
 						},
 						"url": {
-							"raw": "http://127.0.0.1:5000/api/users/{username}",
+							"raw": "http://127.0.0.1:5000/api/users/{user_id}",
 							"protocol": "http",
 							"host": [
 								"127",
@@ -258,7 +258,7 @@
 							"path": [
 								"api",
 								"users",
-								"{username}"
+								"{user_id}"
 							]
 						}
 					},
