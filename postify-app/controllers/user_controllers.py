@@ -72,22 +72,24 @@ class UserController(Resource):
         return jsonify({'users': users_list})
     
 
-# ROTAS POR NOME DE USUÁRIO
-@users_ns.route('/<string:username>')
-class UserByUsernameController(Resource):
-
-    # FUNÇÃO DE MOSTRAR USUÁRIO ESPECÍFICO
+# ROTA PARA FUNÇÃO DE BUSCA DE USUÁRIO POR ID
+@users_ns.route('/<int:user_id>')
+class UserByIdController(Resource):
     @users_ns.response(200, "Detalhes do usuário", model=user_model)
     @users_ns.response(404, "Usuário não encontrado :(")
     @login_required
-    def get(self, username):
-        searched_user = User.query.filter_by(username=username).first()
+    def get(self, user_id):
+        searched_user = User.query.filter_by(user_id=user_id).first()
 
         if searched_user is None:
-            return jsonify({'message': 'Usuário não encontrado :('}), 404
+            return ({'message': 'Usuário não encontrado :('}), 404
         
-        return jsonify({'user_id': searched_user.user_id, 'username': searched_user.username})
+        return ({'user_id': searched_user.user_id, 'username': searched_user.username}), 200
 
+
+# ROTAS POR NOME DE USUÁRIO
+@users_ns.route('/<string:username>')
+class UserByUsernameController(Resource):
 
     # FUNÇÃO DE EDITAR USUÁRIO (UPDATE)
     @users_ns.param('user_email', 'Endereço de email do usuário')
