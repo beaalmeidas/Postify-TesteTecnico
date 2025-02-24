@@ -1,0 +1,28 @@
+version: "3.8"
+
+services:
+  web:
+    build: .
+    container_name: postify_app
+    ports:
+      - "5000:5000"
+    environment:
+      - FLASK_ENV=development
+      - DATABASE_URL=postgresql://admin:1234@db:5432/postify_db
+    depends_on:
+      - db
+
+  db:
+    image: postgres:14
+    container_name: postify_db
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: "1234"
+      POSTGRES_DB: postify_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
