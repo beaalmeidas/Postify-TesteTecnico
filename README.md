@@ -20,6 +20,7 @@
 - **Flask-Login** – Autenticação de usuários
 - **Flask-RestX** – Organização de rotas e integração com Swagger
 - **Swagger** – Documentação automática da API
+- **Docker** – Conteinerização do projeto
 
 ---
 ## Arquitetura do projeto
