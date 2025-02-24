@@ -9,7 +9,7 @@ users_ns = Namespace('Users', description='Manutenção dos dados dos usuários'
 
 
 user_model = users_ns.model('UserModel', {
-    'user_id': fields.Integer,
+    'user_id': fields.Integer(description='ID do usuário'),
     'user_email': fields.String(description='Email do usuário', required=True),
     'user_password': fields.String(description='Senha de usuário', required=True),
     'username': fields.String(description='Nome de usuário', required=True),

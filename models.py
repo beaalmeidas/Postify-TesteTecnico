@@ -43,7 +43,10 @@ class Post(db.Model):
             'post_id': self.post_id,
             'user_id': self.user_id,
             'post_content': self.post_content,
-            'created_at': self.created_at,
-            'updated_at': self.updated_at,
-            'user': self.user.username
+            'created_at': self.created_at.isoformat() if self.created_at else None,
+            'updated_at': self.updated_at.isoformat() if self.updated_at else None,
+            'user': self.user.username if self.user else None
         }
+    
+    def get_id(self):
+        return str(self.post_id)
